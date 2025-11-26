@@ -1,0 +1,29 @@
+{
+  "name": "cerberus-chat",
+  "version": "0.1.0",
+  "description": "Simple RAG system CLI using TypeScript and Mastra AI",
+  "main": "dist/cli.js",
+  "bin": {
+    "cerberus-chat": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "dev": "ts-node src/cli.ts"
+  },
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@mastra-ai/mastra": "^0.2.2",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.2",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
