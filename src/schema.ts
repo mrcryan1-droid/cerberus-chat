@@ -42,3 +42,60 @@ export interface BinaryAsset {
     sourceTicketUid: string;
     fileName?: string;
 }
+
+export interface TextChunk {
+    id: string;
+    text: string;
+    ticketUid: string;
+    ticketMask: string;
+    ticketSubject: string;
+    messageUid?: string;
+    chunkIndex: number;
+    metadata: ChunkMetadata;
+}
+
+export interface ChunkMetadata {
+    ticketUid: string;
+    ticketMask: string;
+    ticketSubject: string;
+    messageUid?: string;
+    isOutgoing?: boolean;
+    chunkIndex: number;
+    totalChunks: number;
+    timestamp?: string;
+    groupId?: number;
+    bucketId?: number;
+}
+
+export interface EmbeddingRecord {
+    id: string;
+    embedding: number[];
+    text: string;
+    metadata: ChunkMetadata;
+}
+
+export interface SearchResult {
+    id: string;
+    text: string;
+    score: number;
+    metadata: ChunkMetadata;
+}
+
+export interface RerankResult {
+    id: string;
+    text: string;
+    score: number;
+    originalIndex: number;
+    metadata: ChunkMetadata;
+}
+
+export interface ChatMessage {
+    role: "system" | "user" | "assistant";
+    content: string;
+}
+
+export interface ChatResponse {
+    answer: string;
+    sources: SearchResult[];
+    tokensUsed: number;
+}
