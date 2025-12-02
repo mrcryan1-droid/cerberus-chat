@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { extractTicketPackage, extractTextContent } from "../ingest/extractor.js";
 import { createTextChunks, chunkByMessages } from "../ingest/chunker.js";
-import { ChromaDB } from "../db/chroma.js";
+import { IVectorStore } from "../db/vector-store.js";
 import { SQLiteDB } from "../db/sqlite.js";
 import { CostTracker } from "../cost-tracker.js";
 import { generateEmbeddings } from "../openai.js";
@@ -12,13 +12,13 @@ import { TicketRecord, MessageRecord, TextChunk } from "../schema.js";
 /**
  * Recursively embeds all ticket JSONs in a directory.
  */
-export async function embedDirectory(directory: string, chroma: ChromaDB, cost: CostTracker) {
+export async function embedDirectory(directory: string, vectorStore: IVectorStore, cost: CostTracker) {
     console.log(`Starting embedding process for directory: ${directory}`);
     
     // Initialize databases
     const sqlite = new SQLiteDB(config.storage.sqlitePath, config.storage.binaryAssetsPath);
     await sqlite.initialize();
-    await chroma.initialize();
+    await vectorStore.initialize();
 
     // Get all JSON files recursively
     const ticketFiles = findTicketFiles(directory);
@@ -85,8 +85,8 @@ export async function embedDirectory(directory: string, chroma: ChromaDB, cost: 
                     
                     const embeddings = await generateEmbeddings(texts, cost);
                     
-                    // Store in ChromaDB
-                    await chroma.upsertBatch(chunkBatch, embeddings);
+                    // Store in vector database
+                    await vectorStore.upsertBatch(chunkBatch, embeddings);
                     
                     totalChunks += chunkBatch.length;
                 }
@@ -112,7 +112,7 @@ export async function embedDirectory(directory: string, chroma: ChromaDB, cost: 
     console.log(`Total chunks embedded: ${totalChunks}`);
     console.log(`Total binaries extracted: ${totalBinaries}`);
     console.log(`Total tokens used: ${cost.getTokenCount()}`);
-    console.log(`Collection size: ${await chroma.count()}`);
+    console.log(`Collection size: ${await vectorStore.count()}`);
 }
 
 /**

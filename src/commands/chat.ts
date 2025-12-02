@@ -1,5 +1,5 @@
 import readline from "readline";
-import { ChromaDB } from "../db/chroma.js";
+import { IVectorStore } from "../db/vector-store.js";
 import { CostTracker } from "../cost-tracker.js";
 import { retrieveRelevantChunks } from "../rag/selector.js";
 import { rerankWithDiversity } from "../rag/reranker.js";
@@ -10,11 +10,11 @@ import { config } from "../config.js";
 /**
  * Interactive chat interface using RAG pipeline.
  */
-export async function chatLoop(chroma: ChromaDB, cost: CostTracker, opts: { jsonOutput: boolean }) {
-    // Initialize ChromaDB
-    await chroma.initialize();
+export async function chatLoop(vectorStore: IVectorStore, cost: CostTracker, opts: { jsonOutput: boolean }) {
+    // Initialize vector store
+    await vectorStore.initialize();
 
-    const collectionCount = await chroma.count();
+    const collectionCount = await vectorStore.count();
     
     if (!opts.jsonOutput) {
         console.log("\n=== Cerberus Chat ===");
@@ -86,7 +86,7 @@ export async function chatLoop(chroma: ChromaDB, cost: CostTracker, opts: { json
         }
 
         try {
-            const response = await processQuery(query, chroma, cost, conversationHistory);
+            const response = await processQuery(query, vectorStore, cost, conversationHistory);
 
             if (opts.jsonOutput) {
                 console.log(JSON.stringify(response, null, 2));
@@ -128,14 +128,14 @@ export async function chatLoop(chroma: ChromaDB, cost: CostTracker, opts: { json
  */
 async function processQuery(
     query: string,
-    chroma: ChromaDB,
+    vectorStore: IVectorStore,
     cost: CostTracker,
     conversationHistory: ChatMessage[]
 ): Promise<ChatResponse> {
     const startTokens = cost.getTokenCount();
 
     // Step 1: Retrieve relevant chunks (two-phase search)
-    const retrievedChunks = await retrieveRelevantChunks(query, chroma, cost);
+    const retrievedChunks = await retrieveRelevantChunks(query, vectorStore, cost);
 
     if (retrievedChunks.length === 0) {
         return {
@@ -195,7 +195,7 @@ async function processQuery(
  */
 export async function processQueryStateless(
     query: string,
-    chroma: ChromaDB,
+    vectorStore: IVectorStore,
     cost: CostTracker
 ): Promise<ChatResponse> {
     const conversationHistory: ChatMessage[] = [
@@ -205,5 +205,5 @@ export async function processQueryStateless(
         },
     ];
 
-    return await processQuery(query, chroma, cost, conversationHistory);
+    return await processQuery(query, vectorStore, cost, conversationHistory);
 }

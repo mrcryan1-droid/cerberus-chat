@@ -2,7 +2,7 @@
 import { program } from "commander";
 import { embedDirectory } from "./commands/embed.js";
 import { chatLoop } from "./commands/chat.js";
-import { ChromaDB } from "./db/chroma.js";
+import { createVectorStore } from "./db/index.js";
 import { CostTracker } from "./cost-tracker.js";
 import { config } from "./config.js";
 
@@ -17,10 +17,10 @@ program
   .option("-c, --collection <name>", "Collection name", config.storage.collectionName)
   .action(async (path, options) => {
     try {
-      const chroma = new ChromaDB(config.storage.chromaPath, options.collection);
+      const vectorStore = createVectorStore(undefined, undefined, options.collection);
       const cost = new CostTracker();
       
-      await embedDirectory(path, chroma, cost);
+      await embedDirectory(path, vectorStore, cost);
       
       if (program.opts().json) {
         console.log(JSON.stringify({ 
@@ -48,10 +48,10 @@ program
   .option("-c, --collection <name>", "Collection name", config.storage.collectionName)
   .action(async (options) => {
     try {
-      const chroma = new ChromaDB(config.storage.chromaPath, options.collection);
+      const vectorStore = createVectorStore(undefined, undefined, options.collection);
       const cost = new CostTracker();
       
-      await chatLoop(chroma, cost, { jsonOutput: program.opts().json });
+      await chatLoop(vectorStore, cost, { jsonOutput: program.opts().json });
     } catch (error) {
       if (program.opts().json) {
         console.error(JSON.stringify({ success: false, error: String(error) }, null, 2));
@@ -68,23 +68,25 @@ program
   .option("-c, --collection <name>", "Collection name", config.storage.collectionName)
   .action(async (options) => {
     try {
-      const chroma = new ChromaDB(config.storage.chromaPath, options.collection);
-      await chroma.initialize();
+      const vectorStore = createVectorStore(undefined, undefined, options.collection);
+      await vectorStore.initialize();
       
-      const count = await chroma.count();
+      const count = await vectorStore.count();
       
       if (program.opts().json) {
         console.log(JSON.stringify({
           collection: options.collection,
           embeddingCount: count,
-          chromaPath: config.storage.chromaPath,
+          vectorStoreType: config.storage.vectorStoreType,
+          vectorDbPath: config.storage.vectorDbPath,
           sqlitePath: config.storage.sqlitePath,
         }, null, 2));
       } else {
         console.log(`\n=== Database Statistics ===`);
         console.log(`Collection: ${options.collection}`);
         console.log(`Embeddings: ${count}`);
-        console.log(`Chroma Path: ${config.storage.chromaPath}`);
+        console.log(`Vector Store: ${config.storage.vectorStoreType}`);
+        console.log(`Vector DB Path: ${config.storage.vectorDbPath}`);
         console.log(`SQLite Path: ${config.storage.sqlitePath}`);
       }
     } catch (error) {

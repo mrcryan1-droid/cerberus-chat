@@ -1,0 +1,55 @@
+{
+    "package": {
+        "name": "Ticket #100001",
+        "revision": 1,
+        "requires": {
+            "cerb_version": "10.4.0",
+            "plugins": []
+        },
+        "configure": {
+            "prompts": [],
+            "placeholders": [],
+            "options": {
+                "disable_events": true
+            }
+        }
+    },
+    "records": [
+        {
+            "uid": "ticket_100001",
+            "_context": "ticket",
+            "mask": "SAMPLE-12345-001",
+            "subject": "Login Issues - Unable to Access Dashboard",
+            "importance": 75,
+            "group_id": 1,
+            "bucket_id": 5
+        },
+        {
+            "uid": "message_200001",
+            "_context": "message",
+            "ticket_id": "{{{uid.ticket_100001}}}",
+            "is_outgoing": 0,
+            "response_time": 0,
+            "hash_header_message_id": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+            "content": "Hi Support Team,\n\nI'm having trouble logging into the dashboard. Every time I try to log in with my credentials, I get an error message saying 'Invalid username or password'. I've double-checked my credentials and I'm sure they're correct.\n\nI've tried:\n- Resetting my password\n- Clearing my browser cache\n- Using a different browser\n\nNone of these have worked. Can you please help?\n\nBest regards,\nJohn Smith"
+        },
+        {
+            "uid": "message_200002",
+            "_context": "message",
+            "ticket_id": "{{{uid.ticket_100001}}}",
+            "is_outgoing": 1,
+            "response_time": 1800,
+            "hash_header_message_id": "q1r2s3t4u5v6w7x8y9z0a1b2c3d4e5f6",
+            "content": "Hello John,\n\nThank you for contacting support. I'm sorry to hear you're experiencing login issues.\n\nI've reviewed your account and noticed that your account was temporarily locked due to multiple failed login attempts. This is a security feature that activates after 5 consecutive failed attempts.\n\nI've unlocked your account, and you should now be able to log in successfully. Please make sure you're using the correct email address as your username and that Caps Lock is not enabled when entering your password.\n\nIf you continue to experience issues, please let me know and I'll be happy to help further.\n\nBest regards,\nSupport Team"
+        },
+        {
+            "uid": "message_200003",
+            "_context": "message",
+            "ticket_id": "{{{uid.ticket_100001}}}",
+            "is_outgoing": 0,
+            "response_time": 0,
+            "hash_header_message_id": "g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2",
+            "content": "Thank you! I can now log in successfully. I appreciate your quick response and help!\n\nJohn"
+        }
+    ]
+}

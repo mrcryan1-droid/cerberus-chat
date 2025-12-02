@@ -9,6 +9,7 @@ dist/
 .env
 
 # Data directories
+vectordb/
 chromadb/
 data/
 *.db

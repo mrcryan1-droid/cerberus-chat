@@ -33,7 +33,8 @@ export interface RetrievalConfig {
 }
 
 export interface StorageConfig {
-  chromaPath: string;
+  vectorDbPath: string;
+  vectorStoreType: string;
   sqlitePath: string;
   binaryAssetsPath: string;
   collectionName: string;
@@ -85,7 +86,8 @@ export function loadConfig(): RAGConfig {
       minSimilarityScore: parseFloat(process.env.MIN_SIMILARITY_SCORE || "0.5"),
     },
     storage: {
-      chromaPath: process.env.CHROMA_PATH || "./chromadb",
+      vectorDbPath: process.env.VECTOR_DB_PATH || "./vectordb",
+      vectorStoreType: process.env.VECTOR_STORE_TYPE || "vectra",
       sqlitePath: process.env.SQLITE_PATH || "./data/metadata.db",
       binaryAssetsPath: process.env.BINARY_ASSETS_PATH || "./data/assets",
       collectionName: process.env.COLLECTION_NAME || "tickets",

@@ -1,4 +1,4 @@
-import { ChromaDB } from "../db/chroma.js";
+import { IVectorStore } from "../db/vector-store.js";
 import { SQLiteDB } from "../db/sqlite.js";
 import { SearchResult } from "../schema.js";
 import { generateEmbedding } from "../openai.js";
@@ -10,7 +10,7 @@ import { config } from "../config.js";
  */
 export async function retrieveRelevantChunks(
     query: string,
-    chroma: ChromaDB,
+    vectorStore: IVectorStore,
     costTracker: CostTracker
 ): Promise<SearchResult[]> {
     console.log(`Retrieving relevant chunks for query: "${query}"`);
@@ -19,7 +19,7 @@ export async function retrieveRelevantChunks(
     const queryEmbedding = await generateEmbedding(query, costTracker);
 
     // Phase 2: Perform hybrid search (combines keyword and semantic)
-    const results = await chroma.hybridSearch(
+    const results = await vectorStore.hybridSearch(
         query,
         queryEmbedding,
         config.retrieval.keywordTopK,
@@ -41,13 +41,13 @@ export async function retrieveRelevantChunks(
  */
 export async function retrieveSemanticChunks(
     query: string,
-    chroma: ChromaDB,
+    vectorStore: IVectorStore,
     costTracker: CostTracker,
     topK?: number
 ): Promise<SearchResult[]> {
     const queryEmbedding = await generateEmbedding(query, costTracker);
     
-    return await chroma.semanticSearch(
+    return await vectorStore.semanticSearch(
         queryEmbedding,
         topK ?? config.retrieval.semanticTopK,
         config.retrieval.minSimilarityScore
@@ -59,10 +59,10 @@ export async function retrieveSemanticChunks(
  */
 export async function retrieveKeywordChunks(
     query: string,
-    chroma: ChromaDB,
+    vectorStore: IVectorStore,
     topK?: number
 ): Promise<SearchResult[]> {
-    return await chroma.metaKeywordSearch(query, topK ?? config.retrieval.keywordTopK);
+    return await vectorStore.metaKeywordSearch(query, topK ?? config.retrieval.keywordTopK);
 }
 
 /**
@@ -70,7 +70,7 @@ export async function retrieveKeywordChunks(
  */
 export async function retrieveWithMetadataFilter(
     query: string,
-    chroma: ChromaDB,
+    vectorStore: IVectorStore,
     costTracker: CostTracker,
     sqlite: SQLiteDB,
     filters?: {
@@ -80,7 +80,7 @@ export async function retrieveWithMetadataFilter(
     }
 ): Promise<SearchResult[]> {
     // First, get all relevant chunks
-    const chunks = await retrieveRelevantChunks(query, chroma, costTracker);
+    const chunks = await retrieveRelevantChunks(query, vectorStore, costTracker);
 
     // Apply metadata filters if provided
     if (!filters) {
@@ -111,14 +111,14 @@ export async function retrieveWithMetadataFilter(
  */
 export async function findSimilarTickets(
     ticketUid: string,
-    chroma: ChromaDB,
+    vectorStore: IVectorStore,
     costTracker: CostTracker,
     topK: number = 5
 ): Promise<SearchResult[]> {
     // First, retrieve some chunks from the ticket to use as query
     const queryEmbedding = await generateEmbedding(ticketUid, costTracker);
     
-    const results = await chroma.semanticSearch(queryEmbedding, topK * 3);
+    const results = await vectorStore.semanticSearch(queryEmbedding, topK * 3);
 
     // Filter out chunks from the same ticket and group by ticket
     const ticketScores = new Map<string, { score: number; chunks: SearchResult[] }>();
